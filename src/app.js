@@ -27,8 +27,10 @@ app.use(express.static("public"));
 const connectDB = require("./db/connect");
 
 //router
+
 const authRouter = require("./routes/auth");
 const workoutsRouter = require("./routes/workouts");
+const racesRouter = require("./routes/races");
 
 // error handler
 const notFoundMiddleware = require("./middleware/not-found");
@@ -52,6 +54,7 @@ app.use(xss());
 app.use("/api/v1/auth", authRouter);
 const authenticateUser = require("./middleware/authentication");
 app.use("/api/v1/workouts", authenticateUser, workoutsRouter);
+app.use("/api/v1/races", authenticateUser, racesRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
