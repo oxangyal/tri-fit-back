@@ -10,6 +10,14 @@ const cors = require("cors");
 const xss = require("xss-clean");
 const rateLimiter = require("express-rate-limit");
 
+
+// app.use(
+//     cors({
+//         origin: "http://localhost:3000",
+//         methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+//         credentials: true,
+//     })
+// );
 app.get("/", (req, res) => {
     res.send('<h1>Tri Fit</h1>');
 });
@@ -46,9 +54,10 @@ app.use(
 
 app.use(express.json());
 app.use(helmet());
-app.use(cors());
+// app.use(cors());
 app.use(xss());
 
+app.use(cors({ origin: "*", methods: "GET,HEAD,PUT,PATCH,POST,DELETE", credentials: true }));
 //routes
 
 app.use("/api/v1/auth", authRouter);
@@ -59,7 +68,7 @@ app.use("/api/v1/races", authenticateUser, racesRouter);
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
-const port = process.env.PORT || 7500;
+const port = process.env.PORT || 5000;
 
 const start = async () => {
     try {
