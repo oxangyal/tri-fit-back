@@ -4,14 +4,7 @@ const RaceSchema = new mongoose.Schema(
     {
         race: {
             type: String,
-            enum: [
-                "sprint",
-                "olympic",
-                "duathlon",
-                "aquathon",
-                "half",
-                "full",
-            ],
+            enum: ["sprint", "olympic", "duathlon", "aquathon", "halfironman", "fullironman", "halfmarathon", "fullmarathon"],
             required: [true, "Please provide race"],
             default: "sprint",
         },
@@ -42,6 +35,9 @@ const RaceSchema = new mongoose.Schema(
             state: {
                 type: String,
             },
+        },
+        description: {
+            type: String,
         },
         createdBy: {
             type: mongoose.Types.ObjectId,

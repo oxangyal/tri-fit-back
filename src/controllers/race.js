@@ -34,7 +34,7 @@ const createRace = async (req, res) => {
 
 const updateRace = async (req, res) => {
     const {
-        body: { race, title, timeOfCompletion, date, location },
+        body: { race, title, timeOfCompletion, date, location, description },
         user: { userId },
         params: { id: raceId },
     } = req;
@@ -61,7 +61,7 @@ const updateRace = async (req, res) => {
 
     const updatedRace = await Race.findByIdAndUpdate(
         { _id: raceId, createdBy: userId },
-        { race, title, timeOfCompletion, date, location },
+        { race, title, timeOfCompletion, date, location, description },
         { new: true, runValidators: true }
     );
     if (!updatedRace) {
