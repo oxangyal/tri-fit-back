@@ -3,9 +3,9 @@ const { StatusCodes } = require("http-status-codes");
 const { BadRequestError, NotFoundError } = require("../errors");
 
 const getAllRaces = async (req, res) => {
-    const races = await Race.find({ createdBy: req.user.userId }).sort(
-        "createdAt"
-    );
+    const races = await Race.find({ createdBy: req.user.userId }).sort({
+        date: 1,
+    });
 
     res.status(StatusCodes.OK).json({ races, count: races.length });
 };

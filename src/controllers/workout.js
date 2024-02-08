@@ -3,13 +3,27 @@ const { StatusCodes } = require("http-status-codes");
 const { BadRequestError, NotFoundError } = require("../errors");
 const { params } = require("../routes/auth");
 
-const getAllWorkouts = async (req, res) => {
-    const workouts = await Workout.find({ createdBy: req.user.userId }).sort(
-        "createdAt"
-    );
+// const getAllWorkouts = async (req, res) => {
+//     const workouts = await Workout.find({ createdBy: req.user.userId }).sort(
+//         "createdAt"
+//     );
 
-    res.status(StatusCodes.OK).json({ workouts, count: workouts.length });
+//     res.status(StatusCodes.OK).json({ workouts, count: workouts.length });
+// };
+const getAllWorkouts = async (req, res) => {
+    try {
+        const workouts = await Workout.find({
+            createdBy: req.user.userId,
+        }).sort({ date: 1 });
+        res.status(StatusCodes.OK).json({ workouts, count: workouts.length });
+    } catch (error) {
+        console.error(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            error: "Internal server error",
+        });
+    }
 };
+
 const getWorkout = async (req, res) => {
     const {
         user: { userId },
@@ -27,11 +41,9 @@ const getWorkout = async (req, res) => {
 };
 
 const createWorkout = async (req, res) => {
-    // console.log(req.body);
     req.body.createdBy = req.user.userId;
     const workout = await Workout.create(req.body);
     res.status(StatusCodes.CREATED).json({ workout });
-    // console.log(workout);
 };
 
 const updateWorkout = async (req, res) => {
@@ -42,28 +54,24 @@ const updateWorkout = async (req, res) => {
             intensity,
             indoor,
             description,
+            date,
             completed,
         },
         user: { userId },
         params: { id: workoutId },
     } = req;
 
-    // console.log("Bububu");
-    console.log(req.body);
-    if (workoutType === "" || duration === "") {
+    if (!workoutType || !duration) {
         throw new BadRequestError(
-            "Workout type or Duration fields cannot be empty"
+            "Workout type and duration fields cannot be empty"
         );
     }
+
     const workout = await Workout.findByIdAndUpdate(
         { _id: workoutId, createdBy: userId },
-        { workoutType, duration, intensity, indoor, description, completed },
-        // req.body,
+        { workoutType, duration, intensity, indoor, description, date, completed },
         { new: true, runValidators: true }
     );
-    res.status(StatusCodes.OK).json({
-        message: "Workout successfully updated",
-    });
     if (!workout) {
         throw new NotFoundError(`No workout with id ${workoutId}`);
     }
@@ -75,20 +83,17 @@ const deleteWorkout = async (req, res) => {
         user: { userId },
         params: { id: workoutId },
     } = req;
-    // console.log("Bububu");
-    console.log(req.body);
+
     const workout = await Workout.findOneAndDelete({
         _id: workoutId,
         createdBy: userId,
     });
-    console.log(workout)
-    res.status(StatusCodes.OK).json({
-        message: "Workout successfully deleted",
-    });
     if (!workout) {
         throw new NotFoundError(`No workout with id ${workoutId}`);
     }
-    res.status(StatusCodes.OK).send();
+    res.status(StatusCodes.OK).json({
+        message: "Workout successfully deleted",
+    });
 };
 
 module.exports = {
