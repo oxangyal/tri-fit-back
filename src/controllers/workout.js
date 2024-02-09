@@ -3,18 +3,12 @@ const { StatusCodes } = require("http-status-codes");
 const { BadRequestError, NotFoundError } = require("../errors");
 const { params } = require("../routes/auth");
 
-// const getAllWorkouts = async (req, res) => {
-//     const workouts = await Workout.find({ createdBy: req.user.userId }).sort(
-//         "createdAt"
-//     );
-
-//     res.status(StatusCodes.OK).json({ workouts, count: workouts.length });
-// };
 const getAllWorkouts = async (req, res) => {
     try {
         const workouts = await Workout.find({
             createdBy: req.user.userId,
-        }).sort({ date: 1 });
+            date: { $gte: new Date() }, 
+        }).sort({ date: 1 }); 
         res.status(StatusCodes.OK).json({ workouts, count: workouts.length });
     } catch (error) {
         console.error(error);
@@ -23,6 +17,19 @@ const getAllWorkouts = async (req, res) => {
         });
     }
 };
+// const getAllWorkouts = async (req, res) => {
+//     try {
+//         const workouts = await Workout.find({
+//             createdBy: req.user.userId,
+//         }).sort({ date: 1 });
+//         res.status(StatusCodes.OK).json({ workouts, count: workouts.length });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+//             error: "Internal server error",
+//         });
+//     }
+// };
 
 const getWorkout = async (req, res) => {
     const {
