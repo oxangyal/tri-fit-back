@@ -3,12 +3,13 @@ const { StatusCodes } = require("http-status-codes");
 const { BadRequestError, NotFoundError } = require("../errors");
 const { params } = require("../routes/auth");
 
-const getAllWorkouts = async (req, res) => {
+// Sorting by upcoming workouts
+const getAllWorkoutsUpcoming = async (req, res) => {
     try {
         const workouts = await Workout.find({
             createdBy: req.user.userId,
-            date: { $gte: new Date() }, 
-        }).sort({ date: 1 }); 
+            date: { $gte: new Date() },
+        }).sort({ date: 1 });
         res.status(StatusCodes.OK).json({ workouts, count: workouts.length });
     } catch (error) {
         console.error(error);
@@ -17,19 +18,20 @@ const getAllWorkouts = async (req, res) => {
         });
     }
 };
-// const getAllWorkouts = async (req, res) => {
-//     try {
-//         const workouts = await Workout.find({
-//             createdBy: req.user.userId,
-//         }).sort({ date: 1 });
-//         res.status(StatusCodes.OK).json({ workouts, count: workouts.length });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-//             error: "Internal server error",
-//         });
-//     }
-// };
+
+const getAllWorkouts = async (req, res) => {
+    try {
+        const workouts = await Workout.find({
+            createdBy: req.user.userId,
+        }).sort({ date: 1 });
+        res.status(StatusCodes.OK).json({ workouts, count: workouts.length });
+    } catch (error) {
+        console.error(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            error: "Internal server error",
+        });
+    }
+};
 
 const getWorkout = async (req, res) => {
     const {
@@ -76,7 +78,15 @@ const updateWorkout = async (req, res) => {
 
     const workout = await Workout.findByIdAndUpdate(
         { _id: workoutId, createdBy: userId },
-        { workoutType, duration, intensity, indoor, description, date, completed },
+        {
+            workoutType,
+            duration,
+            intensity,
+            indoor,
+            description,
+            date,
+            completed,
+        },
         { new: true, runValidators: true }
     );
     if (!workout) {
@@ -90,8 +100,7 @@ const deleteWorkout = async (req, res) => {
         user: { userId },
         params: { id: workoutId },
     } = req;
-
-    const workout = await Workout.findOneAndDelete({
+    const workout = await Workout.findByIdAndDelete({
         _id: workoutId,
         createdBy: userId,
     });
@@ -101,12 +110,14 @@ const deleteWorkout = async (req, res) => {
     res.status(StatusCodes.OK).json({
         message: "Workout successfully deleted",
     });
+    res.status(StatusCodes.OK).send();
 };
 
 module.exports = {
     createWorkout,
     deleteWorkout,
     getAllWorkouts,
+    getAllWorkoutsUpcoming,
     updateWorkout,
     getWorkout,
 };
