@@ -1,14 +1,47 @@
 const Race = require("../models/Race");
 const { StatusCodes } = require("http-status-codes");
 const { BadRequestError, NotFoundError } = require("../errors");
+const { params } = require("../routes/auth");
 
 const getAllRaces = async (req, res) => {
-    const races = await Race.find({ createdBy: req.user.userId }).sort({
-        date: 1,
-    });
+    try {
+        const page = Number(req.query.page) || 1;
+        const sortField = req.query.sortField || "date"; 
+        const sortOrder = req.query.sortOrder === "desc" ? -1 : 1;
+        const limit = 4;
+        const skip = (page - 1) * limit;
 
-    res.status(StatusCodes.OK).json({ races, count: races.length });
+        const racesCount = await Race.find({
+            createdBy: req.user.userId,
+        }).countDocuments();
+        const totalPages = Math.ceil(racesCount / limit);
+
+        const races = await Race.find({ createdBy: req.user.userId })
+            .sort({ [sortField]: sortOrder })
+            .skip(skip)
+            .limit(limit);
+
+        res.status(StatusCodes.OK).json({
+            races,
+            count: races.length,
+            totalPages: totalPages,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            error: "Internal server error",
+        });
+    }
 };
+
+
+// const getAllRaces = async (req, res) => {
+//     const races = await Race.find({ createdBy: req.user.userId }).sort({
+//         date: 1,
+//     });
+
+//     res.status(StatusCodes.OK).json({ races, count: races.length });
+// };
 
 const getRace = async (req, res) => {
     const {
@@ -80,6 +113,7 @@ const deleteRace = async (req, res) => {
         _id: raceId,
         createdBy: userId,
     });
+    
     res.status(StatusCodes.OK).json({
         message: "Race successfully deleted",
     });
@@ -93,6 +127,7 @@ module.exports = {
     createRace,
     deleteRace,
     getAllRaces,
+    // getAllRacesUpcoming, 
     updateRace,
     getRace,
 };
