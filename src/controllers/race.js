@@ -3,7 +3,7 @@ const { StatusCodes } = require("http-status-codes");
 const { BadRequestError, NotFoundError } = require("../errors");
 const { params } = require("../routes/auth");
 
-const getAllRaces = async (req, res) => {
+const getAllRacesList = async (req, res) => {
     try {
         const page = Number(req.query.page) || 1;
         const sortField = req.query.sortField || "date"; 
@@ -35,13 +35,13 @@ const getAllRaces = async (req, res) => {
 };
 
 
-// const getAllRaces = async (req, res) => {
-//     const races = await Race.find({ createdBy: req.user.userId }).sort({
-//         date: 1,
-//     });
+const getAllRaces = async (req, res) => {
+    const races = await Race.find({ createdBy: req.user.userId }).sort({
+        date: 1,
+    });
 
-//     res.status(StatusCodes.OK).json({ races, count: races.length });
-// };
+    res.status(StatusCodes.OK).json({ races, count: races.length });
+};
 
 const getRace = async (req, res) => {
     const {
@@ -127,7 +127,7 @@ module.exports = {
     createRace,
     deleteRace,
     getAllRaces,
-    // getAllRacesUpcoming, 
+    getAllRacesList, 
     updateRace,
     getRace,
 };
